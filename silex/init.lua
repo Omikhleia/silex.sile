@@ -7,7 +7,7 @@
 -- Some are fixes or workarounds for issues in SILE.
 --
 SILE.X = SILE.X or {
-  version = "0.1.0",
+  version = "0.2.0",
 }
 
 SU.debug("silex", "Loading extra inputters if available")

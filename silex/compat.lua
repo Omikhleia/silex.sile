@@ -1,4 +1,6 @@
-SILE.X = SILE.X or {}
+--- Compatibility layer
+-- Stuff we had in various "Omikhleia" packages, that we need to keep working
+-- with earlier versions of SILE.
 
 -- Loosely inspired from https://github.com/kikito/semver.lua
 -- (MIT License (c) 2011 Enrique García Cota)
