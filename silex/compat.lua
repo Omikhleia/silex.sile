@@ -191,11 +191,31 @@ if SILEVERSION < semver("0.14.9") then
     self.declarations[spec.parameter] = spec
     self:set(spec.parameter, spec.default, true)
   end
+
   -- See https://github.com/sile-typesetter/sile/issues/1718
   local oldInitLine = SILE.typesetters.base.initline
   SILE.typesetters.base.initline = function (self)
     if self.state.hmodeOnly then return end
     oldInitLine(self)
+  end
+
+  -- See https://github.com/sile-typesetter/sile/pull/1765
+  local infinity = SILE.measurement(1e13)
+  function SILE.nodefactory.hfillglue:_init (spec)
+    self:super(spec)
+    self.width = SILE.length(self.width.length, infinity, self.width.shrink)
+  end
+  function SILE.nodefactory.hssglue:_init (spec)
+    self:super(spec)
+    self.width = SILE.length(self.width.length, infinity, infinity)
+  end
+  function SILE.nodefactory.vfillglue:_init (spec)
+    self:super(spec)
+    self.height = SILE.length(self.width.length, infinity, self.width.shrink)
+  end
+  function SILE.nodefactory.vssglue:_init (spec)
+    self:super(spec)
+    self.height = SILE.length(self.width.length, infinity, infinity)
   end
 else
   SU.debug("silex", "No need for patching pre-0.14.9 issues")
