@@ -26,15 +26,21 @@ We cannot wait forever for SILE to implement this: Markdown and Djot need to be 
 This modules implements some additions and changes which should be provided by SILE in my humble opinion...
 
 - More tolerance on uninitialized inputters options (non-breaking)
+
 - Greek numbering ("greek") for counters, similar to the existing "alpha" (non-breaking)
+
   _Rationale:_
   There are books where one wants to "number" items with Greek letters in sequence (e.g. annotations in biblical material), as α β γ δ ε ζ η θ ι κ λ μ ν ξ ο π ρ σ τ υ φ χ ψ ω. ICU provides _arithmetic_ Greek numbering systems, but this is not what one wants here.
+
 - Re-implementation of the centered and ragged environments, to respect margins (a.k.a. left and right skips) when nested (for instance in block quotes) and to honor the paragraph indent (possibly breaking :warning:)
+  
   _Rationale:_
   The "core" implementation of these environments is broken since its inception.
+
 - Re-implementation of the `\em` command to support nested emphasis (possibly breaking :warning:)
+**re·sil·ient**
   _Rationale:_
-  See [SILE issue 1048](https://github.com/sile-typesetter/sile/issues/1048) for context. Djot and Markdown both recognized nested emphasis...
+  See [SILE issue 1048](https://github.com/sile-typesetter/sile/issues/1048) for context. Djot and Markdown both recognize nested emphasis...
 
 **silex.fork** :warning: Opinionated departure from SILE 0.14.
 
