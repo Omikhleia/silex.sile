@@ -38,7 +38,7 @@ This modules implements some additions and changes which should be provided by S
   The "core" implementation of these environments is broken since its inception.
 
 - Re-implementation of the `\em` command to support nested emphasis (possibly breaking :warning:)
-**re·sil·ient**
+
   _Rationale:_
   See [SILE issue 1048](https://github.com/sile-typesetter/sile/issues/1048) for context. Djot and Markdown both recognize nested emphasis...
 
