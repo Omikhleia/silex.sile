@@ -9,7 +9,22 @@ A silex is a kind of hard stone.
 This is **sile·x**, a common layer for [**re·sil·ient**](https://github.com/Omikhleia/resilient.sile) and other modules:
 Some common bricks and blocks, compatility features, opinionated hacks, and eXperimental eXpansions, hence the name.
 
+:warning: **sile·x** overrides several SILE internals, and may therefore break some of your packages and classes.
+
 ## Features
+
+**classes** and **typesetters** :warning: Opinionated departure from SILE 0.14.
+
+Modified implementation of the base typesetter and class.
+
+- Cancellation of the multiple package instantiation model in the base class.
+
+  See **silex.fork** below for details.
+
+- Propagation of hanged indent from paragraph to paragraph.
+
+  _Rationale:_
+  See [SILE discussion 1742](https://github.com/sile-typesetter/sile/discussions/1742)
 
 **silex.lang**
 
