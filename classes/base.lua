@@ -1,3 +1,7 @@
+--- SILE base document class.
+--
+-- WARNING: With sile·x modifications
+--
 local class = pl.class()
 class.type = "class"
 class._name = "base"

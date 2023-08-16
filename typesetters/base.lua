@@ -1,5 +1,7 @@
 --- SILE typesetter (default/base) class.
 --
+-- WARNING: With sile·x modifications
+--
 -- @copyright License: MIT
 -- @module typesetters.base
 --
@@ -553,10 +555,15 @@ function typesetter:boxUpNodes ()
     vboxes[#vboxes+1] = vbox
     for i=1, #migrating do vboxes[#vboxes+1] = migrating[i] end
     self.state.previousVbox = vbox
-    if pageBreakPenalty > 0 then
+    -- BEGIN SILEX HANGED LINES
+    if line.hanged then
+      -- Do not break the frame in hanged lines for dropped capitals etc.
+      vboxes[#vboxes+1] = SILE.nodefactory.penalty(10000)
+    elseif pageBreakPenalty > 0 then
       SU.debug("typesetter", "adding penalty of", pageBreakPenalty, "after", vbox)
       vboxes[#vboxes+1] = SILE.nodefactory.penalty(pageBreakPenalty)
     end
+    -- END SILEX HANGED LINES
   end
   return vboxes
 end
@@ -931,6 +938,15 @@ function typesetter:breakpointsToLines (breakpoints)
         local ratio = self:computeLineRatio(point.width, slice)
         local thisLine = { ratio = ratio, nodes = slice }
         lines[#lines+1] = thisLine
+
+        -- BEGIN SILEX HANGED LINES
+        if self.state.hangAfter and self.state.hangAfter < 0 then
+          -- Mark the line as hanged so we can later add a penalty:
+          -- Surely we don't want a frame break in the middle of dropped
+          -- capitals &c.
+          thisLine.hanged = true
+        end
+        -- END SILEX HANGED LINES
       end
     end
   end
