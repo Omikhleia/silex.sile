@@ -11,6 +11,25 @@ Some common bricks and blocks, compatility features, opinionated hacks, and eXpe
 
 :warning: **sile·x** overrides several SILE internals, and may therefore break some of your packages and classes.
 
+Notably, you might fail to build the SILE manual with it.
+That's the cost to pay...
+
+### Installation and removal
+
+Install with [Luarocks](https://luarocks.org/):
+
+```shell
+luarocks install silex.sile
+```
+
+Uninstall:
+
+```shell
+luarocks remove silex.sile
+```
+
+Obviously, modules needing it (and therefore also intalling it as a dependency), such as [markdown.sile](https://github.com/Omikhleia/markdown.sile) and [resilient.sile](https://github.com/Omikhleia/resilient.sile) (amongst others) will not work without it.
+
 ## Features
 
 **classes** and **typesetters** :warning: Opinionated departure from SILE 0.14.
@@ -85,7 +104,7 @@ Official release dates are not predictable, and may moreover take some time to r
 
 ## Affected modules
 
-If you use packages or classes from the following modules, some features of **silex** will be loaded globally. Your documents using them may therefore be impacted from that point on.
+If you use packages or classes from the following modules, some features of **silex** will be loaded globally. Your documents using them may therefore be impacted from that point.
 
 - The packages from [smartquotes.sile](https://github.com/Omikhleia/smartquotes.sile) enable **silex.lang**.
 
@@ -94,6 +113,8 @@ If you use packages or classes from the following modules, some features of **si
 - The packages from [ptable.sile](https://github.com/Omikhleia/ptable.sile) enable **silex.compat**.
 
 - The packages and classes from [resilient.sile](https://github.com/Omikhleia/resilient.sile) enable **all** features.
+
+As noted, some global changes are also introduced in the typesetter and base document class. Side-effects are therefore possible on some workflows.
 
 ## Future directions
 
