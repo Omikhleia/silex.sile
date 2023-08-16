@@ -8,21 +8,21 @@
 -- moving on and cancelling it...
 SU.debug("silex", "Patching core for multiple instantiation side effects")
 
-local class = require("classes.plain")
-function class:loadPackage (packname, options)
-  local pack = require(("packages.%s"):format(packname))
-  if type(pack) == "table" and pack.type == "package" then -- new package
-    -- HACK
-    -- I beg to disagree with SILE here
-    if self.packages[pack._name] then
-      return SU.debug("silex", "Ignoring package already loaded in the class:", pack._name)
-    end
-    self.packages[pack._name] = pack(options)
-  else -- legacy package
-    SU.warn("CLASS: legacy package "..pack._name)
-    self:initPackage(pack, options)
-  end
-end
+-- local class = require("classes.plain")
+-- function class:loadPackage (packname, options)
+--   local pack = require(("packages.%s"):format(packname))
+--   if type(pack) == "table" and pack.type == "package" then -- new package
+--     -- HACK
+--     -- I beg to disagree with SILE here
+--     if self.packages[pack._name] then
+--       return SU.debug("silex", "Ignoring package already loaded in the class:", pack._name)
+--     end
+--     self.packages[pack._name] = pack(options)
+--   else -- legacy package
+--     SU.warn("CLASS: legacy package "..pack._name)
+--     self:initPackage(pack, options)
+--   end
+-- end
 
 SILE.use = function (module, options)
   local pack
