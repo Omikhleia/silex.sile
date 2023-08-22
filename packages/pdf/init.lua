@@ -36,7 +36,7 @@ function package:registerCommands ()
   self:registerCommand("pdf:bookmark", function (options, _)
     local dest = SU.required(options, "dest", "pdf:bookmark")
     local title = SU.required(options, "title", "pdf:bookmark")
-    local level = options.level or 1
+    local level = SU.cast("integer", options.level or 1)
     -- Added UTF8 to UTF16-BE conversion
     -- For annotations and bookmarks, text strings must be encoded using
     -- either PDFDocEncoding or UTF16-BE with a leading byte-order marker.
@@ -46,16 +46,8 @@ function package:registerCommands ()
     if type(SILE.outputter._ensureInit) == "function" then
       SILE.outputter:_ensureInit()
     end
-    SILE.typesetter:pushHbox({
-      value = nil,
-      height = SILE.measurement(0),
-      width = SILE.measurement(0),
-      depth = SILE.measurement(0),
-      outputYourself = function ()
-        local d = "<</Title<" .. ustr .. ">/A<</S/GoTo/D(" .. dest .. ")>>>>"
-        pdf.bookmark(d, level)
-      end
-    })
+    local d = "<</Title<" .. ustr .. ">/A<</S/GoTo/D(" .. dest .. ")>>>>"
+    pdf.bookmark(d, level)
   end)
 
   self:registerCommand("pdf:literal", function (_, content)
@@ -139,15 +131,7 @@ function package:registerCommands ()
     if type(SILE.outputter._ensureInit) == "function" then
       SILE.outputter:_ensureInit()
     end
-    SILE.typesetter:pushHbox({
-      value = nil,
-      height = SILE.measurement(0),
-      width = SILE.measurement(0),
-      depth = SILE.measurement(0),
-      outputYourself = function (_, _, _)
-        pdf.metadata(key, value)
-      end
-    })
+    pdf.metadata(key, value)
   end)
 
 end
