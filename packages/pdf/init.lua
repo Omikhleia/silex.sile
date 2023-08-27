@@ -77,7 +77,7 @@ function package:registerCommands ()
       outputYourself = function (_, typesetter, _)
         x0 = typesetter.frame.state.cursorX:tonumber()
         y0 = (SILE.documentState.paperSize[2] - typesetter.frame.state.cursorY):tonumber()
-        SILE.outputter:enterLinkTarget(dest, opts)
+        SILE.outputter:enterLinkTarget(x0, y0, dest, opts)
       end
     })
     local hbox, hlist = SILE.typesetter:makeHbox(content) -- hack
