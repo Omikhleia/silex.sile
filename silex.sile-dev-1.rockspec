@@ -24,7 +24,18 @@ build = {
     ["sile.silex.fixes"]  = "silex/fixes.lua",
     ["sile.silex.compat"] = "silex/compat.lua",
     ["sile.silex.ast"]    = "silex/ast.lua",
+
     ["sile.classes.base"]     = "classes/base.lua",
     ["sile.typesetters.base"] = "typesetters/base.lua",
+
+    ["sile.packages.background"]  = "packages/background/init.lua",
+    ["sile.packages.cropmarks"]  = "packages/cropmarks/init.lua",
+    ["sile.packages.pdf"]  = "packages/pdf/init.lua",
+    ["sile.packages.rotate"]  = "packages/rotate/init.lua",
+    ["sile.packages.scalebox"]  = "packages/scalebox/init.lua",
+    ["sile.packages.url"]  = "packages/url/init.lua",
+
+    ["sile.outputters.base"]  = "outputters/base.lua",
+    ["sile.outputters.libtexpdf"]  = "outputters/libtexpdf.lua",
   }
 }

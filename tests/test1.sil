@@ -1,0 +1,52 @@
+\begin[papersize=6in x 9in, bleed=0.25in, sheetsize=a4]{document}
+\use[module=packages/dropcaps]
+\use[module=packages/lorem]
+\use[module=packages/cropmarks]
+\use[module=packages/background]
+\use[module=packages/svg]
+\use[module=packages/image]
+\use[module=packages/scalebox]
+\use[module=packages/rotate]
+\use[module=packages/textsubsuper]
+\use[module=packages/url]
+\cropmarks:setup
+\background[color=#e9d8ba, allpages=false]
+\pdf:metadata[key=Title, value=Some title]
+\pdf:metadata[key=Author, value=Some author]
+\dropcap{T}his is paragraph 1. \lorem
+
+This is paragraph 2.
+\pdf:bookmark[dest=link1, level=1, title=Link1]
+\pdf:bookmark[dest=link2, level=2, title=Link2]
+
+\bigskip
+
+\dropcap{P}aragraph 3 here, large and in charge.
+
+Paragraph 4. Oh dear…\lorem
+
+\bigskip
+Here is an \scalebox[xratio=0.75, yratio=1.25]{example}.
+
+here is some text rotated by
+\rotate[angle=10]{ten}, \rotate[angle=20]{twenty}, and \rotate[angle=40]{forty} degrees.
+
+Some text with super\textsuperscript[fake=true]{super} and sub\textsubscript[fake=true]{sub}.
+
+\bigskip
+\href[src=http://www.google.com, borderwidth=1pt]{This is a link to Google.}
+
+\pdf:link[dest=link1, borderwidth=1pt]{This is an internal link.}
+
+\supereject
+
+\background[src=stained-paper.jpg, allpages=false]
+
+\center{\svg[src=oldmanandbooks.svg, width=50%lw]}
+
+\center{\img[src=gutenberg.png, width=50%lw]}
+
+Here is my link target: \pdf:destination[name=link1]\lorem
+
+Another link target is \pdf:destination[name=link2]here
+\end{document}
