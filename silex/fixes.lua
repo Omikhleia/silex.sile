@@ -148,3 +148,34 @@ function class:registerCommands()
     SILE.call("raggedleft", {}, content)
   end)
 end
+
+-- -----------------------------------------------------------------------
+
+-- See https://github.com/sile-typesetter/sile/issues/1875
+-- Remove warning when file is not found and let the caller handle errors.
+function SILE.resolveFile (filename, pathprefix)
+  local candidates = {}
+  -- Start with the raw file name as given prefixed with a path if requested
+  if pathprefix then candidates[#candidates+1] = pl.path.join(pathprefix, "?") end
+  -- Also check the raw file name without a path
+  candidates[#candidates+1] = "?"
+  -- Iterate through the directory of the master file, the SILE_PATH variable, and the current directory
+  -- Check for prefixed paths first, then the plain path in that fails
+  if SILE.masterDir then
+    for path in SU.gtoke(SILE.masterDir..";"..tostring(os.getenv("SILE_PATH")), ";") do
+      if path.string and path.string ~= "nil" then
+        if pathprefix then candidates[#candidates+1] = pl.path.join(path.string, pathprefix, "?") end
+        candidates[#candidates+1] = pl.path.join(path.string, "?")
+      end
+    end
+  end
+  -- Return the first candidate that exists, also checking the .sil suffix
+  local path = table.concat(candidates, ";")
+  local resolved, err = package.searchpath(filename, path, "/")
+  if resolved then
+    if SILE.makeDeps then SILE.makeDeps:add(resolved) end
+  -- else
+  --   SU.warn(("Unable to find file '%s': %s"):format(filename, err))
+  end
+  return resolved
+end
