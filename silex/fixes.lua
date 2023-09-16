@@ -171,7 +171,7 @@ function SILE.resolveFile (filename, pathprefix)
   end
   -- Return the first candidate that exists, also checking the .sil suffix
   local path = table.concat(candidates, ";")
-  local resolved, err = package.searchpath(filename, path, "/")
+  local resolved, _ = package.searchpath(filename, path, "/")
   if resolved then
     if SILE.makeDeps then SILE.makeDeps:add(resolved) end
   -- else
