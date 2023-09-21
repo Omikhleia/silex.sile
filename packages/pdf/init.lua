@@ -28,8 +28,15 @@ function package:registerCommands ()
     local dest = SU.required(options, "dest", "pdf:bookmark")
     local title = SU.required(options, "title", "pdf:bookmark")
     local level = SU.cast("integer", options.level or 1)
-
-    SILE.outputter:setBookmark(dest, title, level)
+    SILE.typesetter:pushHbox({
+      value = nil,
+      height = SILE.measurement(0),
+      width = SILE.measurement(0),
+      depth = SILE.measurement(0),
+      outputYourself = function ()
+        SILE.outputter:setBookmark(dest, title, level)
+      end
+    })
   end)
 
   self:registerCommand("pdf:literal", function (_, content)
