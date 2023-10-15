@@ -36,7 +36,7 @@ function outputter.debugHbox (_, _, _) end
 
 function outputter.linkAnchor (_, _, _) end -- Unstable API
 
-function outputter.enterLinkTarget (_, _, _) end -- Unstable API
+function outputter.enterLinkTarget (_, _, _, _, _) end -- Unstable API
 
 function outputter.leaveLinkTarget (_, _, _, _, _, _, _) end -- Unstable API
 

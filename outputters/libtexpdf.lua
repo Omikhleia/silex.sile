@@ -324,7 +324,7 @@ local function borderStyle (style, width)
   return "/Border[0 0 " .. width .. "]"
 end
 
-function outputter:enterLinkTarget (_, _) -- destination, options as argument
+function outputter:enterLinkTarget (_, _, _, _) -- coords, destination, options as argument
   -- HACK:
   -- Looking at the code, pdf.begin_annotation does nothing, and Simon wrote a comment
   -- about tracking boxes. Unsure what he implied with this obscure statement.
