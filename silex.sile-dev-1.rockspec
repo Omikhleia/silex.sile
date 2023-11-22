@@ -19,7 +19,6 @@ build = {
   type = "builtin",
   modules = {
     ["sile.silex"]        = "silex/init.lua",
-    ["sile.silex.fork"]   = "silex/fork.lua",
     ["sile.silex.lang"]   = "silex/lang.lua",
     ["sile.silex.fixes"]  = "silex/fixes.lua",
     ["sile.silex.compat"] = "silex/compat.lua",
