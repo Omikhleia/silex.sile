@@ -1,9 +1,9 @@
 rockspec_format = "3.0"
 package = "silex.sile"
-version = "0.4.0-1"
+version = "0.4.1-1"
 source = {
   url = "git+https://github.com/Omikhleia/silex.sile.git",
-  tag = "v0.4.0",
+  tag = "v0.4.1",
 }
 description = {
   summary = "Extension layer for SILE and resilient",
