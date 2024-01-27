@@ -6,6 +6,7 @@ local ast = {}
 
 --- Find a command node in a SILE AST tree,
 --- looking only at the first level.
+--- (We're not reimplementing XPath here.)
 ---@param tree      table       AST tree
 ---@param command   string      command name
 ---@return          table|nil   AST command node
@@ -22,13 +23,15 @@ end
 ---@param tree      table       AST tree
 ---@param command   string      command name
 ---@return          table|nil   AST command node
-function ast.extractFromTree (tree, command)
+function ast.removeFromTree (tree, command)
   for i=1, #tree do
     if type(tree[i]) == "table" and tree[i].command == command then
       return table.remove(tree, i)
     end
   end
 end
+
+ast.extractFromTree = ast.removeFromTree -- SILEX: compatibility alias
 
 --- Create a command from a simple content tree.
 --- It encapsulates the content in a command node.
@@ -122,8 +125,8 @@ function ast.trimSubContent (content)
 end
 
 --- Process the AST walking through content nodes as a "structure":
---- Text nodes are ignored (e.g. usually just spaces due to XML indentation)
---- Command nodes are enriched with their "true" node position, so we can later
+--- Text nodes are ignored (e.g. usually just spaces due to indentation)
+--- Command options are enriched with their "true" node position, so we can later
 --- refer to it (as with an XPath pos()).
 ---@param content   table   AST tree
 function ast.processAsStructure (content)
@@ -145,4 +148,76 @@ function ast.processAsStructure (content)
   end
 end
 
+--- Call `action` on each content AST node, recursively, including `content` itself.
+--- Not called on leaves, i.e. strings.
+---@param content   table       AST tree
+---@param action    function    function to call on each node
+function ast.walkContent (content, action)
+  if type(content) ~= "table" then
+    return
+  end
+  action(content)
+  for i = 1, #content do
+    ast.walkContent(content[i], action)
+  end
+end
+
+--- Strip position, line and column recursively from a content tree.
+--- This can be used to remove position details where we do not want them,
+--- e.g. in table of contents entries (referring to the original content,
+--- regardless where it was exactly, for the purpose of checking whether
+--- the table of contents changed.)
+---@param content   table   AST tree
+---@return          table   AST tree
+function ast.stripContentPos (content)
+  if type(content) ~= "table" then
+    return content
+  end
+  local stripped = {}
+  for k, v in pairs(content) do
+    if type(v) == "table" then
+      v = ast.stripContentPos(v)
+    end
+    stripped[k] = v
+  end
+  if content.id or content.command then
+    stripped.pos, stripped.col, stripped.lno = nil, nil, nil
+  end
+  return stripped
+end
+
+--- Flatten content trees into just the string components (allows passing
+--- objects with complex structures to functions that need plain strings)
+--- @param content   table   AST tree
+--- @return          string  string representation of content
+function ast.contentToString (content)
+  local string = ""
+  for i = 1, #content do
+    if type(content[i]) == "table" and type(content[i][1]) == "string" then
+      string = string .. content[i][1]
+    elseif type(content[i]) == "string" then
+      -- Work around PEG parser returning env tags as content
+      -- TODO: refactor capture groups in PEG parser
+      if content.command == content[i] and content[i] == content[i+1] then
+        break
+      end
+      string = string .. content[i]
+    end
+  end
+  return string
+end
+
+--- Check whether a content AST tree is empty.
+---@param content   table     AST tree
+---@return          boolean   true if content is not empty
+function ast.hasContent (content)
+  return type(content) == "function" or type(content) == "table" and #content > 0
+end
+
+-- BEGIN SILEX compatibility layer
+if not SU.ast then
+  SU.debug("silex", "Providing SU.ast compatibility (SILE 0.15)")
+  SU.ast = ast
+end
+-- END SILEX compatibility layer
 return ast
