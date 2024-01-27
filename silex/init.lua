@@ -1,14 +1,15 @@
 --
 -- eXperimental eXpansions to SILE
--- 2023 Didier Willis
+-- 2023-2024 Didier Willis
 -- License: MIT
 --
 -- Some of these are a departure from SILE's intents.
 -- Some are fixes or workarounds for issues in SILE.
 --
 SILE.X = SILE.X or {
-  version = "0.3.0",
+  version = "0.4.0",
 }
+require("silex.override")
 
 SU.debug("silex", "Loading extra inputters if available")
 pcall(function () local _ = SILE.inputters.silm end)

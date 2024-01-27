@@ -3,6 +3,8 @@
 
 -- -----------------------------------------------------------------------
 
+-- PLANNED IN SILE 0.15.0
+-- See https://github.com/sile-typesetter/sile/commit/7a833b0fd3d8fd21e7f7bb29a0d780c404eba9c2
 -- Annoyingly, inputters options can be nil.
 -- Let be more tolerant and safe
 local inputter = require("inputters.base")
@@ -14,6 +16,8 @@ end
 
 -- -----------------------------------------------------------------------
 
+-- PLANNED IN SILE 0.15.0
+-- See https://github.com/sile-typesetter/sile/pull/1913
 -- Greek numbering ("greek") for counters, similar to "alpha".
 -- There are books where one wants to number items with Greek letters in
 -- sequence, e.g. annotations in biblical material etc.
@@ -47,15 +51,16 @@ function class:registerCommands()
 
   -- Italic nesting.
   -- See https://github.com/sile-typesetter/sile/issues/1048
-  -- The proposal there was to keep "em" and introduced "emph" as the nesting
-  -- variant. But let's be more drastic and just make "em" nestable.
-  -- We shouldn't care for compatibility with early defective designs.
+  -- PLANNED IN SILE 0.15.0
+  -- See https://github.com/sile-typesetter/sile/pull/1913
   self:registerCommand("em", function (_, content)
     local style = SILE.settings:get("font.style")
     local toggle = (style and style:lower() == "italic") and "Regular" or "Italic"
     SILE.call("font", { style = toggle }, content)
   end)
 
+  -- PLANNED IN SILE 0.15.0
+  -- See https://github.com/sile-typesetter/sile/pull/1913
   -- SILE's original centered and ragged environments do not allow nesting,
   -- i.e. they reset the left and/or right skips and thus apply to the full
   -- line width, loosing all margins.
@@ -152,6 +157,7 @@ end
 -- -----------------------------------------------------------------------
 
 -- See https://github.com/sile-typesetter/sile/issues/1875
+-- FIXED IN 0.14.12 = TO BE EVENTUALLY REMOVED FROM SILEX
 -- Remove warning when file is not found and let the caller handle errors.
 function SILE.resolveFile (filename, pathprefix)
   local candidates = {}
