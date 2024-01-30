@@ -1014,6 +1014,31 @@ function linerLeaveNode:__tostring ()
   return "-L[" .. self.name .. "]"
 end
 
+local linerBox = pl.class(SILE.nodefactory.hbox)
+function linerBox:_init (name, outputMethod)
+  SILE.nodefactory.hbox._init(self)
+  self.width = SILE.length()
+  self.height = SILE.length()
+  self.depth = SILE.length()
+  self.name = name
+  self.inner = {}
+  self.outputYourself = outputMethod
+end
+function linerBox:append (node)
+  self.inner[#self.inner+1] = node
+  self.width = self.width + node.width
+  self.height = SU.max(self.height, node.height)
+  self.depth = SU.max(self.depth, node.depth)
+end
+function linerBox:outputContent (tsetter, line)
+  for _, node in ipairs(self.inner) do
+    node.outputYourself(node, tsetter, line)
+  end
+end
+function linerBox:__tostring ()
+  return "*L[" .. self.name .. "]H<" .. tostring(self.width) .. ">^" .. tostring(self.height) .. "-" .. tostring(self.depth) .. "v"
+end
+
 --- Any unclosed liner is reopened on the current line, so we clone and repeat
 -- it.
 -- An assumption is that the inserts are done after the current slice content,
@@ -1040,43 +1065,32 @@ end
 function typesetter:reboxLiners (slice)
   local outSlice = {}
   local migratingList = {}
-  local hboxStack = {}
+  local lboxStack = {}
   for i = 1, #slice do
     local node = slice[i]
     if node.is_enter then
       SU.debug("typesetter.liner", "Start reboxing", node)
-      local n = SILE.nodefactory.hbox({
-        width = SILE.length(),
-        height = SILE.length(),
-        depth = SILE.length(),
-        name = node.name, -- For mere debug
-        inner = {},
-        outputYourself = node.outputMethod
-      })
-      hboxStack[#hboxStack+1] = n
+      local n = linerBox(node.name, node.outputMethod)
+      lboxStack[#lboxStack+1] = n
     elseif node.is_leave then
-      if #hboxStack == 0 then
+      if #lboxStack == 0 then
         SU.error("Multiliner box stacking mismatch" .. node)
-      elseif  #hboxStack == 1 then
+      elseif  #lboxStack == 1 then
         SU.debug("typesetter.liner", "End reboxing", node, "(toplevel)")
-        outSlice[#outSlice+1] = hboxStack[1]
+        outSlice[#outSlice+1] = lboxStack[1]
       else
         SU.debug("typesetter.liner", "End reboxing", node, "(nested)")
-        local hbox = hboxStack[#hboxStack - 1]
-        hbox.inner[#hbox.inner+1] = hboxStack[#hboxStack]
+        local hbox = lboxStack[#lboxStack - 1]
+        hbox.inner[#hbox.inner+1] = lboxStack[#lboxStack]
       end
-      hboxStack[#hboxStack] = nil
+      lboxStack[#lboxStack] = nil
       pl.tablex.insertvalues(outSlice, migratingList)
       migratingList = {}
     else
-      if #hboxStack > 0 then
+      if #lboxStack > 0 then
         if not node.is_migrating then
-          local hbox = hboxStack[#hboxStack]
-          -- Add node and recomputes dimensions
-          hbox.inner[#hbox.inner+1] = node
-          hbox.width = hbox.width + node.width
-          hbox.height = SU.max(hbox.height, node.height)
-          hbox.depth = SU.max(hbox.depth, node.depth)
+          local lbox = lboxStack[#lboxStack]
+          lbox:append(node)
         else
           migratingList[#migratingList+1] = node
         end
@@ -1456,8 +1470,9 @@ end
 -- into a box.
 -- These boxes will be formatted according to some output logic.
 -- The output method has the same signature as the outputYourself method
--- of a box, and is responsible for outputting the liner content, which
--- is in the "inner" field of this wrapping box.
+-- of a box, and is responsible for outputting the liner inner content with the
+-- outputContent(typesetter, line) method, possibly surrounded by some additional
+-- effects.
 -- If we are already in horizontal-restricted mode, the liner is processed
 -- immediately, since line breaking won't occur then.
 ---@param name            string    Name of the liner (usefull for debugging)
@@ -1467,13 +1482,9 @@ function typesetter:liner (name, content, outputYourself)
   if self.state.hmodeOnly then
     SU.debug("typesetter.liner", "Applying liner in horizontal-restricted mode")
     local hbox, hlist = self:makeHbox(content)
-    self:pushHbox({
-      width = hbox.width,
-      height = hbox.height,
-      depth = hbox.depth,
-      inner = { hbox },
-      outputYourself = outputYourself,
-    })
+    local lbox = linerBox(name, outputYourself)
+    lbox:append(hbox)
+    self:pushHorizontal(lbox)
     self:pushHlist(hlist)
   else
     self.state.linerCount = (self.state.linerCount or 0) + 1

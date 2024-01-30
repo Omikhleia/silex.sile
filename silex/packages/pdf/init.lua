@@ -63,12 +63,10 @@ function package:registerCommands ()
 
         -- Build the content.
         -- Cursor will be moved by the actual definitive size.
-        for _, node in ipairs(box.inner) do
-          node:outputYourself(typesetter, line)
-        end
-
+        box:outputContent(typesetter, line)
         local x1 = typesetter.frame.state.cursorX:tonumber()
         local y1 = (SILE.documentState.paperSize[2] - typesetter.frame.state.cursorY + box.height):tonumber()
+
         SILE.outputter:endLink(dest, opts, x0, y0, x1, y1) -- Unstable API
       end
     )

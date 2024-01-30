@@ -156,9 +156,7 @@ function package:registerCommands ()
 
         -- Build the content.
         -- Cursor will be moved by the actual definitive size.
-        for _, node in ipairs(box.inner) do
-          node:outputYourself(typesetter, line)
-        end
+        box:outputContent(typesetter, line)
         local newX = typesetter.frame.state.cursorX
 
         -- Output a line.
@@ -180,10 +178,9 @@ function package:registerCommands ()
 
         -- Build the content.
         -- Cursor will be moved by the actual definitive size.
-        for _, node in ipairs(box.inner) do
-          node:outputYourself(typesetter, line)
-        end
+        box:outputContent(typesetter, line)
         local newX = typesetter.frame.state.cursorX
+
         -- Output a line.
         -- NOTE: The OpenType spec is not explicit regarding how the size
         -- (thickness) affects the position. We opt to distribute evenly

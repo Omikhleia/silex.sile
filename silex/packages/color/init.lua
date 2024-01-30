@@ -14,9 +14,7 @@ function package:registerCommands ()
     -- (folio, footnotes, etc.)
     SILE.typesetter:liner("color", content, function (box, typesetter, line)
       SILE.outputter:pushColor(color)
-      for _, node in ipairs(box.inner) do
-        node:outputYourself(typesetter, line)
-      end
+      box:outputContent(typesetter, line)
       SILE.outputter:popColor()
     end)
   end, "Changes the active ink color to the color <color>.")
