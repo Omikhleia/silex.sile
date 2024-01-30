@@ -28,13 +28,15 @@ local deltaX
 local deltaY
 local function trueXCoord (x)
   if not deltaX then
-    deltaX = (SILE.documentState.sheetSize[1] - SILE.documentState.paperSize[1]) / 2
+    local sheetSize = SILE.documentState.sheetSize or SILE.documentState.paperSize
+    deltaX = (sheetSize[1] - SILE.documentState.paperSize[1]) / 2
   end
   return x + deltaX
 end
 local function trueYCoord (y)
   if not deltaY then
-    deltaY = (SILE.documentState.sheetSize[2] - SILE.documentState.paperSize[2]) / 2
+    local sheetSize = SILE.documentState.sheetSize or SILE.documentState.paperSize
+    deltaY = (sheetSize[2] - SILE.documentState.paperSize[2]) / 2
   end
   return y + deltaY
 end
@@ -45,7 +47,8 @@ end
 
 function outputter:_ensureInit ()
   if not started then
-    local w, h = SILE.documentState.sheetSize[1], SILE.documentState.sheetSize[2]
+    local sheetSize = SILE.documentState.sheetSize or SILE.documentState.paperSize
+    local w, h = sheetSize[1], sheetSize[2]
     local fname = self:getOutputFilename()
     -- Ideally we could want to set the PDF CropBox, BleedBox, TrimBox...
     -- Our wrapper only manages the MediaBox at this point.
@@ -61,14 +64,14 @@ function outputter:newPage ()
   pdf.beginpage()
 end
 
--- pdf stucture package needs a tie in here
+-- pdf structure package needs a tie in here
 function outputter._endHook (_)
 end
 
 function outputter:finish ()
   self:_ensureInit()
   pdf.endpage()
-  self:_endHook()
+  self:runHooks("prefinish")
   pdf.finish()
   started = false
   lastkey = nil
@@ -193,7 +196,8 @@ function outputter:drawSVG (figure, x, y, _, height, scalefactor)
   pdf.add_content("q")
   self:setCursor(x, y)
   x, y = self:getCursor()
-  local newy = y - SILE.documentState.paperSize[2] / 2 + height - SILE.documentState.sheetSize[2] / 2
+  local sheetSize = SILE.documentState.sheetSize or SILE.documentState.paperSize
+  local newy = y - SILE.documentState.paperSize[2] / 2 + height - sheetSize[2] / 2
   pdf.add_content(table.concat({ scalefactor, 0, 0, -scalefactor, trueXCoord(x), newy, "cm" }, " "))
   pdf.add_content(figure)
   pdf.add_content("Q")
@@ -303,7 +307,7 @@ end
 
 -- Unstable link APIs
 
-function outputter:linkAnchor (x, y, name)
+function outputter:setLinkAnchor (name, x, y)
   x = SU.cast("number", x)
   y = SU.cast("number", y)
   self:_ensureInit()
@@ -324,17 +328,18 @@ local function borderStyle (style, width)
   return "/Border[0 0 " .. width .. "]"
 end
 
-function outputter:enterLinkTarget (_, _) -- destination, options as argument
+function outputter:startLink (_, _) -- destination, options as argument
+  self:_ensureInit()
   -- HACK:
   -- Looking at the code, pdf.begin_annotation does nothing, and Simon wrote a comment
   -- about tracking boxes. Unsure what he implied with this obscure statement.
   -- Sure thing is that some backends may need the destination here, e.g. an HTML backend
   -- would generate a <a href="#destination">, as well as the options possibly for styling
   -- on the link opening?
-  self:_ensureInit()
   pdf.begin_annotation()
 end
-function outputter.leaveLinkTarget (_, x0, y0, x1, y1, dest, opts)
+
+function outputter.endLink (_, dest, opts, x0, y0, x1, y1)
   local bordercolor = borderColor(opts.bordercolor)
   local borderwidth = SU.cast("integer", opts.borderwidth)
   local borderstyle = borderStyle(opts.borderstyle, borderwidth)
@@ -371,7 +376,6 @@ function outputter:setMetadata (key, value)
 end
 
 function outputter:setBookmark (dest, title, level)
-  -- Added UTF8 to UTF16-BE conversion
   -- For annotations and bookmarks, text strings must be encoded using
   -- either PDFDocEncoding or UTF16-BE with a leading byte-order marker.
   -- As PDFDocEncoding supports only limited character repertoire for
@@ -380,6 +384,12 @@ function outputter:setBookmark (dest, title, level)
   local d = "<</Title<" .. ustr .. ">/A<</S/GoTo/D(" .. dest .. ")>>>>"
   self:_ensureInit()
   pdf.bookmark(d, level)
+end
+
+-- Assumes the caller known what they want to stuff in raw PDF format
+function outputter:drawRaw (literal)
+   self:_ensureInit()
+   pdf.add_content(literal)
 end
 
 return outputter
