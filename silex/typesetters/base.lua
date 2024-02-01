@@ -1006,7 +1006,7 @@ end
 -- These two special nodes are used to track the current liner entry and exit.
 -- As Sith Lords, they are always two: they are local here, so no one can
 -- use one alone and break the balance of the Force.
-local linerEnterNode = pl.class(SILE.nodefactory.zerohbox)
+local linerEnterNode = pl.class(SILE.nodefactory.hbox)
 function linerEnterNode:_init(name, outputMethod)
   SILE.nodefactory.hbox._init(self)
   self.outputMethod = outputMethod
@@ -1017,10 +1017,13 @@ function linerEnterNode:clone()
   local n = linerEnterNode(self.name, self.outputMethod)
   return n
 end
+function linerEnterNode:outputYourself ()
+  SU.error("A liner enter node " .. tostring(self) .. "'' made it to output", true)
+end
 function linerEnterNode:__tostring ()
   return "+L[" .. self.name .. "]"
 end
-local linerLeaveNode = pl.class(SILE.nodefactory.zerohbox)
+local linerLeaveNode = pl.class(SILE.nodefactory.hbox)
 function linerLeaveNode:_init(name)
   SILE.nodefactory.hbox._init(self)
   self.name = name
@@ -1029,6 +1032,9 @@ end
 function linerLeaveNode:clone()
   local n = linerLeaveNode(self.name)
   return n
+end
+function linerLeaveNode:outputYourself ()
+  SU.error("A liner leave node " .. tostring(self) .. "'' made it to output", true)
 end
 function linerLeaveNode:__tostring ()
   return "-L[" .. self.name .. "]"
@@ -1049,6 +1055,9 @@ function linerBox:append (node)
   self.width = self.width + node.width
   self.height = SU.max(self.height, node.height)
   self.depth = SU.max(self.depth, node.depth)
+end
+function linerBox:count ()
+  return #self.inner
 end
 function linerBox:outputContent (tsetter, line)
   for _, node in ipairs(self.inner) do
@@ -1095,13 +1104,19 @@ function typesetter:reboxLiners (slice)
     elseif node.is_leave then
       if #lboxStack == 0 then
         SU.error("Multiliner box stacking mismatch" .. node)
-      elseif  #lboxStack == 1 then
-        SU.debug("typesetter.liner", "End reboxing", node, "(toplevel)")
-        outSlice[#outSlice+1] = lboxStack[1]
+      elseif #lboxStack == 1 then
+        SU.debug("typesetter.liner", "End reboxing", node,
+                 "(toplevel) =", lboxStack[1]:count(), "nodes")
+        if lboxStack[1]:count() > 0 then
+          outSlice[#outSlice+1] = lboxStack[1]
+        end
       else
-        SU.debug("typesetter.liner", "End reboxing", node, "(nested)")
-        local hbox = lboxStack[#lboxStack - 1]
-        hbox.inner[#hbox.inner+1] = lboxStack[#lboxStack]
+        SU.debug("typesetter.liner", "End reboxing", node,
+                  "(sublevel) =", lboxStack[#lboxStack]:count(), "nodes")
+        if lboxStack[#lboxStack]:count() > 0 then
+          local hbox = lboxStack[#lboxStack - 1]
+          hbox:append(lboxStack[#lboxStack])
+        end
       end
       lboxStack[#lboxStack] = nil
       pl.tablex.insertvalues(outSlice, migratingList)
@@ -1200,7 +1215,7 @@ function typesetter:breakpointsToLines (breakpoints)
         local currentNode = nodes[j]
         if not currentNode.discardable
           and not (currentNode.is_glue and not currentNode.explicit)
-          and not (currentNode.is_zero and not currentNode.is_enter) then
+          and not currentNode.is_zero then
           -- actual visible content starts here
           lastContentNodeIndex = #slice + 1
         end
@@ -1208,6 +1223,7 @@ function typesetter:breakpointsToLines (breakpoints)
           -- Any stacked liner (unclosed from a previous line) is reopened on
           -- the current line.
           seenLiner = self:repeatEnterLiners(slice)
+          lastContentNodeIndex = #slice + 1
         end
         if currentNode.is_discretionary and currentNode.used then
           -- This is the used (prebreak) discretionary from a previous line,
