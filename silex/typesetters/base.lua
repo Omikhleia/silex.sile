@@ -1014,8 +1014,7 @@ function linerEnterNode:_init(name, outputMethod)
   self.is_enter = true
 end
 function linerEnterNode:clone()
-  local n = linerEnterNode(self.name, self.outputMethod)
-  return n
+  return linerEnterNode(self.name, self.outputMethod)
 end
 function linerEnterNode:outputYourself ()
   SU.error("A liner enter node " .. tostring(self) .. "'' made it to output", true)
@@ -1030,8 +1029,7 @@ function linerLeaveNode:_init(name)
   self.is_leave = true
 end
 function linerLeaveNode:clone()
-  local n = linerLeaveNode(self.name)
-  return n
+  return linerLeaveNode(self.name)
 end
 function linerLeaveNode:outputYourself ()
   SU.error("A liner leave node " .. tostring(self) .. "'' made it to output", true)
@@ -1074,7 +1072,7 @@ end
 -- supposed to be just before meaningful (visible) content.
 ---@param slice   table   Current line nodes
 ---@return boolean        Whether a liner was reopened
-function typesetter:repeatEnterLiners (slice)
+function typesetter:_repeatEnterLiners (slice)
   local m = self.state.liners
   if #m > 0 then
     for i = 1, #m  do
@@ -1091,7 +1089,7 @@ end
 -- Migrating content, however, must be kept outside the hboxes at top slice level.
 ---@param  slice  table   Flat nodes from current line
 ---@return table          New reboxed slice
-function typesetter:reboxLiners (slice)
+function typesetter._reboxLiners (_, slice)
   local outSlice = {}
   local migratingList = {}
   local lboxStack = {}
@@ -1140,7 +1138,7 @@ end
 --- Check if a node is a liner, and process it if so, in a stack.
 ---@param node  any          Current node
 ---@return      boolean      Whether a liner was opened
-function typesetter:processIfLiner(node)
+function typesetter:_processIfLiner(node)
   local entered = false
   if node.is_enter then
     SU.debug("typesetter.liner", "Enter liner", node)
@@ -1161,7 +1159,7 @@ function typesetter:processIfLiner(node)
   return entered
 end
 
-function typesetter:repeatLeaveLiners(slice, insertIndex)
+function typesetter:_repeatLeaveLiners(slice, insertIndex)
   for _, v in ipairs(self.state.liners) do
     if not v.link then
       local n = linerLeaveNode(v.name)
@@ -1222,7 +1220,7 @@ function typesetter:breakpointsToLines (breakpoints)
         if not seenLiner and lastContentNodeIndex then
           -- Any stacked liner (unclosed from a previous line) is reopened on
           -- the current line.
-          seenLiner = self:repeatEnterLiners(slice)
+          seenLiner = self:_repeatEnterLiners(slice)
           lastContentNodeIndex = #slice + 1
         end
         if currentNode.is_discretionary and currentNode.used then
@@ -1235,7 +1233,7 @@ function typesetter:breakpointsToLines (breakpoints)
           if not currentNode.discardable then
             seenNonDiscardable = true
           end
-          seenLiner = self:processIfLiner(currentNode) or seenLiner
+          seenLiner = self:_processIfLiner(currentNode) or seenLiner
         end
       end
       -- END SILEX LINER
@@ -1257,7 +1255,7 @@ function typesetter:breakpointsToLines (breakpoints)
         -- BEGIN SILEX LINER
         -- Any unclosed liner is closed on the next line in reverse order.
         if lastContentNodeIndex then
-          self:repeatLeaveLiners(slice, lastContentNodeIndex + 1)
+          self:_repeatLeaveLiners(slice, lastContentNodeIndex + 1)
         end
         -- END SILEX LINER
 
@@ -1286,7 +1284,7 @@ function typesetter:breakpointsToLines (breakpoints)
         -- BEGIN SILEX LINER
         -- Re-shuffle liners, if any, into their own boxes.
         if seenLiner then
-          slice = self:reboxLiners(slice)
+          slice = self:_reboxLiners(slice)
         end
         -- END SILEX LINER
 
