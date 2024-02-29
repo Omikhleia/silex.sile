@@ -42,6 +42,11 @@ Modified implementation of the base typesetter and class.
   _Rationale:_
   See [SILE discussion 1742](https://github.com/sile-typesetter/sile/discussions/1742)
 
+- Multi-liners i.e. support for environment spanning multiple lines.
+
+  _Rationale:_
+  Early adoption of SILE PR [1977](https://github.com/sile-typesetter/sile/pull/1977)
+
 **outputters and packages** :warning: In-advance adoption of features.
 
 Modified implementation of the PDF outputter and of several packages depending on it.
