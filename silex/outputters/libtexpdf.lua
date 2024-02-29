@@ -328,7 +328,7 @@ local function borderStyle (style, width)
   return "/Border[0 0 " .. width .. "]"
 end
 
-function outputter:startLink (_, _) -- destination, options as argument
+function outputter:beginLink (_, _) -- destination, options as argument
   self:_ensureInit()
   -- HACK:
   -- Looking at the code, pdf.begin_annotation does nothing, and Simon wrote a comment
