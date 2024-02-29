@@ -30,9 +30,11 @@ build = {
     ["sile.silex.typesetters.base"] = "silex/typesetters/base.lua",
 
     ["sile.silex.packages.background"]  = "silex/packages/background/init.lua",
+    ["sile.silex.packages.color"]       = "silex/packages/color/init.lua",
     ["sile.silex.packages.cropmarks"]   = "silex/packages/cropmarks/init.lua",
     ["sile.silex.packages.pdf"]         = "silex/packages/pdf/init.lua",
     ["sile.silex.packages.rotate"]      = "silex/packages/rotate/init.lua",
+    ["sile.silex.packages.rules"]       = "silex/packages/rules/init.lua",
     ["sile.silex.packages.scalebox"]    = "silex/packages/scalebox/init.lua",
     ["sile.silex.packages.url"]         = "silex/packages/url/init.lua",
 
