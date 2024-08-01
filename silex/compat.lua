@@ -80,22 +80,23 @@ if SILEVERSION < semver("0.14.9") then
   end
 
   -- See https://github.com/sile-typesetter/sile/pull/1765
-  local infinity = SILE.measurement(1e13)
-  function SILE.nodefactory.hfillglue:_init (spec)
+  -- FIXED IN SILE 0.14.9
+  local infinity = SILE.types.measurement(1e13)
+  function SILE.types.node.hfillglue:_init (spec)
     self:super(spec)
-    self.width = SILE.length(self.width.length, infinity, self.width.shrink)
+    self.width = SILE.types.length(self.width.length, infinity, self.width.shrink)
   end
-  function SILE.nodefactory.hssglue:_init (spec)
+  function SILE.types.node.hssglue:_init (spec)
     self:super(spec)
-    self.width = SILE.length(self.width.length, infinity, infinity)
+    self.width = SILE.types.length(self.width.length, infinity, infinity)
   end
-  function SILE.nodefactory.vfillglue:_init (spec)
+  function SILE.types.node.vfillglue:_init (spec)
     self:super(spec)
-    self.height = SILE.length(self.width.length, infinity, self.width.shrink)
+    self.height = SILE.types.length(self.width.length, infinity, self.width.shrink)
   end
-  function SILE.nodefactory.vssglue:_init (spec)
+  function SILE.types.node.vssglue:_init (spec)
     self:super(spec)
-    self.height = SILE.length(self.width.length, infinity, infinity)
+    self.height = SILE.types.length(self.width.length, infinity, infinity)
   end
 else
   SU.debug("silex", "No need for patching pre-0.14.9 issues")
