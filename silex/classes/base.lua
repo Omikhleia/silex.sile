@@ -370,7 +370,7 @@ function class:registerCommands ()
 
   self:registerCommand("script", function (options, content)
     local packopts = packOptions(options)
-    if SU.hasContent(content) then
+    if SU.ast.hasContent(content) then
       return SILE.processString(content[1], options.format or "lua", nil, packopts)
     elseif options.src then
       return SILE.require(options.src)
@@ -382,8 +382,8 @@ function class:registerCommands ()
 
   self:registerCommand("include", function (options, content)
     local packopts = packOptions(options)
-    if SU.hasContent(content) then
-      local doc = SU.contentToString(content)
+    if SU.ast.hasContent(content) then
+      local doc = SU.ast.contentToString(content)
       return SILE.processString(doc, options.format, nil, packopts)
     elseif options.src then
       return SILE.processFile(options.src, options.format, packopts)
@@ -394,8 +394,8 @@ function class:registerCommands ()
 
   self:registerCommand("lua", function (options, content)
     local packopts = packOptions(options)
-    if SU.hasContent(content) then
-      local doc = SU.contentToString(content)
+    if SU.ast.hasContent(content) then
+      local doc = SU.ast.contentToString(content)
       return SILE.processString(doc, "lua", nil, packopts)
     elseif options.src then
       return SILE.processFile(options.src, "lua", packopts)
@@ -409,8 +409,8 @@ function class:registerCommands ()
 
   self:registerCommand("sil", function (options, content)
     local packopts = packOptions(options)
-    if SU.hasContent(content) then
-      local doc = SU.contentToString(content)
+    if SU.ast.hasContent(content) then
+      local doc = SU.ast.contentToString(content)
       return SILE.processString(doc, "sil")
     elseif options.src then
       return SILE.processFile(options.src, "sil", packopts)
@@ -421,8 +421,8 @@ function class:registerCommands ()
 
   self:registerCommand("xml", function (options, content)
     local packopts = packOptions(options)
-    if SU.hasContent(content) then
-      local doc = SU.contentToString(content)
+    if SU.ast.hasContent(content) then
+      local doc = SU.ast.contentToString(content)
       return SILE.processString(doc, "xml", nil, packopts)
     elseif options.src then
       return SILE.processFile(options.src, "xml", packopts)
@@ -434,7 +434,7 @@ function class:registerCommands ()
   self:registerCommand("use", function (options, content)
     local packopts = packOptions(options)
     if content[1] and string.len(content[1]) > 0 then
-      local doc = SU.contentToString(content)
+      local doc = SU.ast.contentToString(content)
       SILE.processString(doc, "lua", nil, packopts)
     else
       if options.src then
@@ -479,7 +479,7 @@ function class:registerCommands ()
   end, "Inserts a penalty node. Option is penalty= for the size of the penalty.")
 
   self:registerCommand("discretionary", function (options, _)
-    local discretionary = SILE.nodefactory.discretionary({})
+    local discretionary = SILE.types.node.discretionary({})
     if options.prebreak then
       local hbox = SILE.typesetter:makeHbox({ options.prebreak })
       discretionary.prebreak = { hbox }
@@ -502,12 +502,12 @@ function class:registerCommands ()
 
   self:registerCommand("kern", function (options, _)
     local width = SU.cast("length", options.width):absolute()
-    SILE.typesetter:pushHorizontal(SILE.nodefactory.kern(width))
+    SILE.typesetter:pushHorizontal(SILE.types.node.kern(width))
   end, "Inserts a glue node. The width option denotes the glue dimension.")
 
   self:registerCommand("skip", function (options, _)
     options.discardable = SU.boolean(options.discardable, false)
-    options.height = SILE.length(options.height):absolute()
+    options.height = SILE.types.length(options.height):absolute()
     SILE.typesetter:leaveHmode()
     if options.discardable then
       SILE.typesetter:pushVglue(options)

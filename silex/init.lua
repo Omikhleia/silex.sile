@@ -7,8 +7,10 @@
 -- Some are fixes or workarounds for issues in SILE.
 --
 SILE.X = SILE.X or {
-  version = "0.4.0",
+  version = "0.6.0",
 }
+require("silex.types")
+require("silex.ast")
 require("silex.override")
 
 SU.debug("silex", "Loading extra inputters if available")

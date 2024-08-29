@@ -3,8 +3,8 @@
 
 -- -----------------------------------------------------------------------
 
--- PLANNED IN SILE 0.15.0
 -- See https://github.com/sile-typesetter/sile/commit/7a833b0fd3d8fd21e7f7bb29a0d780c404eba9c2
+-- FIXED IN SILE 0.15.0
 -- Annoyingly, inputters options can be nil.
 -- Let be more tolerant and safe
 local inputter = require("inputters.base")
@@ -16,8 +16,8 @@ end
 
 -- -----------------------------------------------------------------------
 
--- PLANNED IN SILE 0.15.0
 -- See https://github.com/sile-typesetter/sile/pull/1913
+-- FIXED IN SILE 0.15.0
 -- Greek numbering ("greek") for counters, similar to "alpha".
 -- There are books where one wants to number items with Greek letters in
 -- sequence, e.g. annotations in biblical material etc.
@@ -25,21 +25,26 @@ end
 -- We can't use ICU "grek" or "greklow" numbering systems because they are
 -- arithmetic e.g. 6 is a digamma, 11 is iota alpha, etc. and all followed by
 -- a numeric marker (prime-like symbol).
-local luautf8 = require("lua-utf8")
-SU.formatNumber.und.greek = function(num)
-  local out = ""
-  local a = SU.codepoint("α") -- alpha
-  if num < 18 then
-    -- alpha to rho
-    out = luautf8.char(num + a - 1)
-  elseif num < 25 then
-    -- sigma to omega (unicode has two sigmas here, we skip one)
-    out = luautf8.char(num + a)
-  else
-    -- Don't try to be too clever
-    SU.error("Greek numbering is only supported up to 24")
+if not SU.formatNumber.und.greek then
+  SU.debug("silex", "Patching Greek numbering for SILE 0.14")
+  local luautf8 = require("lua-utf8")
+  SU.formatNumber.und.greek = function(num)
+    local out = ""
+    local a = SU.codepoint("α") -- alpha
+    if num < 18 then
+      -- alpha to rho
+      out = luautf8.char(num + a - 1)
+    elseif num < 25 then
+      -- sigma to omega (unicode has two sigmas here, we skip one)
+      out = luautf8.char(num + a)
+    else
+      -- Don't try to be too clever
+      SU.error("Greek numbering is only supported up to 24")
+    end
+    return out
   end
-  return out
+else
+  SU.debug("silex", "No need to patch Greek numbering")
 end
 
 -- -----------------------------------------------------------------------
@@ -51,7 +56,7 @@ function class:registerCommands()
 
   -- Italic nesting.
   -- See https://github.com/sile-typesetter/sile/issues/1048
-  -- PLANNED IN SILE 0.15.0
+  -- FIXED IN SILE 0.15.0
   -- See https://github.com/sile-typesetter/sile/pull/1913
   self:registerCommand("em", function (_, content)
     local style = SILE.settings:get("font.style")
@@ -59,8 +64,8 @@ function class:registerCommands()
     SILE.call("font", { style = toggle }, content)
   end)
 
-  -- PLANNED IN SILE 0.15.0
   -- See https://github.com/sile-typesetter/sile/pull/1913
+  -- FIXED IN SILE 0.15.0
   -- SILE's original centered and ragged environments do not allow nesting,
   -- i.e. they reset the left and/or right skips and thus apply to the full
   -- line width, loosing all margins.
@@ -76,14 +81,14 @@ function class:registerCommands()
       SU.warn("\\center environment started after other nodes in a paragraph, may not center as expected")
     end
     SILE.settings:temporarily(function ()
-      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
-      local rskip = SILE.settings:get("document.rskip") or SILE.nodefactory.glue()
-      SILE.settings:set("document.parindent", SILE.nodefactory.glue())
-      SILE.settings:set("current.parindent", SILE.nodefactory.glue())
-      SILE.settings:set("document.lskip", SILE.nodefactory.hfillglue(lskip.width.length))
-      SILE.settings:set("document.rskip", SILE.nodefactory.hfillglue(rskip.width.length))
-      SILE.settings:set("typesetter.parfillskip", SILE.nodefactory.glue())
-      SILE.settings:set("document.spaceskip", SILE.length("1spc", 0, 0))
+      local lskip = SILE.settings:get("document.lskip") or SILE.types.node.glue()
+      local rskip = SILE.settings:get("document.rskip") or SILE.types.node.glue()
+      SILE.settings:set("document.parindent", SILE.types.node.glue())
+      SILE.settings:set("current.parindent", SILE.types.node.glue())
+      SILE.settings:set("document.lskip", SILE.types.node.hfillglue(lskip.width.length))
+      SILE.settings:set("document.rskip", SILE.types.node.hfillglue(rskip.width.length))
+      SILE.settings:set("typesetter.parfillskip", SILE.types.node.glue())
+      SILE.settings:set("document.spaceskip", SILE.types.length("1spc", 0, 0))
       SILE.process(content)
       SILE.call("par")
     end)
@@ -91,12 +96,12 @@ function class:registerCommands()
 
   self:registerCommand("raggedright", function (_, content)
     SILE.settings:temporarily(function ()
-      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
-      local rskip = SILE.settings:get("document.rskip") or SILE.nodefactory.glue()
-      SILE.settings:set("document.lskip", SILE.nodefactory.glue(lskip.width.length))
-      SILE.settings:set("document.rskip", SILE.nodefactory.hfillglue(rskip.width.length))
-      SILE.settings:set("typesetter.parfillskip", SILE.nodefactory.glue())
-      SILE.settings:set("document.spaceskip", SILE.length("1spc", 0, 0))
+      local lskip = SILE.settings:get("document.lskip") or SILE.types.node.glue()
+      local rskip = SILE.settings:get("document.rskip") or SILE.types.node.glue()
+      SILE.settings:set("document.lskip", SILE.types.node.glue(lskip.width.length))
+      SILE.settings:set("document.rskip", SILE.types.node.hfillglue(rskip.width.length))
+      SILE.settings:set("typesetter.parfillskip", SILE.types.node.glue())
+      SILE.settings:set("document.spaceskip", SILE.types.length("1spc", 0, 0))
       SILE.process(content)
       SILE.call("par")
     end)
@@ -104,12 +109,12 @@ function class:registerCommands()
 
   self:registerCommand("raggedleft", function (_, content)
     SILE.settings:temporarily(function ()
-      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
-      local rskip = SILE.settings:get("document.rskip") or SILE.nodefactory.glue()
-      SILE.settings:set("document.lskip", SILE.nodefactory.hfillglue(lskip.width.length))
-      SILE.settings:set("document.rskip", SILE.nodefactory.glue(rskip.width.length))
-      SILE.settings:set("typesetter.parfillskip", SILE.nodefactory.glue())
-      SILE.settings:set("document.spaceskip", SILE.length("1spc", 0, 0))
+      local lskip = SILE.settings:get("document.lskip") or SILE.types.node.glue()
+      local rskip = SILE.settings:get("document.rskip") or SILE.types.node.glue()
+      SILE.settings:set("document.lskip", SILE.types.node.hfillglue(lskip.width.length))
+      SILE.settings:set("document.rskip", SILE.types.node.glue(rskip.width.length))
+      SILE.settings:set("typesetter.parfillskip", SILE.types.node.glue())
+      SILE.settings:set("document.spaceskip", SILE.types.length("1spc", 0, 0))
       SILE.process(content)
       SILE.call("par")
     end)
@@ -117,14 +122,14 @@ function class:registerCommands()
 
   self:registerCommand("justified", function (_, content)
     SILE.settings:temporarily(function ()
-      local lskip = SILE.settings:get("document.lskip") or SILE.nodefactory.glue()
-      local rskip = SILE.settings:get("document.rskip") or SILE.nodefactory.glue()
-      SILE.settings:set("document.lskip", SILE.nodefactory.glue(lskip.width.length))
-      SILE.settings:set("document.rskip", SILE.nodefactory.glue(rskip.width.length))
+      local lskip = SILE.settings:get("document.lskip") or SILE.types.node.glue()
+      local rskip = SILE.settings:get("document.rskip") or SILE.types.node.glue()
+      SILE.settings:set("document.lskip", SILE.types.node.glue(lskip.width.length))
+      SILE.settings:set("document.rskip", SILE.types.node.glue(rskip.width.length))
       SILE.settings:set("document.spaceskip", nil)
       -- HACK. This knows too much about parfillskip defaults...
       -- (Which must be big, but smaller than infinity. Doh!)
-      SILE.settings:set("typesetter.parfillskip", SILE.nodefactory.glue("0pt plus 10000pt"))
+      SILE.settings:set("typesetter.parfillskip", SILE.types.node.glue("0pt plus 10000pt"))
       SILE.process(content)
       SILE.call("par")
     end)
