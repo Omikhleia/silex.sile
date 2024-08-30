@@ -32,7 +32,7 @@ SILE.X.forLanguage = forLanguage
 
 -- Now we can patch the language support module, hacking the initial implementation
 local icu = require("justenoughicu")
-local loadonce = {}
+SILE.scratch.loaded_languages = {}
 SILE.languageSupport.languages = {}
     -- BEGIN OMIKHLEIA HACKLANG
     -- BAD CODE SMELL WARNING
@@ -60,8 +60,8 @@ SILE.languageSupport.loadLanguage = function (language)
     end
     -- END OMIKHLEIA HACKLANG
 
-    if loadonce[language] then return end
-    loadonce[language] = true
+    if SILE.scratch.loaded_languages[language] then return end
+    SILE.scratch.loaded_languages[language] = true
 
     -- BEGIN OMIKHLEIA HACKLANG
     -- We need to find language resources for this BCP47 identifier, from the less specific
