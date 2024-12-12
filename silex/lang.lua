@@ -92,31 +92,27 @@ SILE.languageSupport.loadLanguage = function (language)
 
     -- We need to find fluent reources for this BCP47 identifier, from the less specific
     -- to the more general.
-    local ftlresource, matchedi18n = forLanguage(language, function (lang)
-      local resource = string.format("i18n.%s", lang)
-      SU.debug("fluent", "Loading FTL resource", resource, "into locale", lang)
+    local ftlresource, resolved_resource = forLanguage(language, function (lang)
+      local original_language = fluent:get_locale()
+      local resource = string.format("languages.%s.messages", lang)
       fluent:set_locale(lang)
+      SU.debug("fluent", "Loading FTL resource", resource, "into locale", lang)
       local gotftl, ftl = pcall(require, resource)
-      return gotftl and ftl
+      if not gotftl or not ftl then
+        -- Try legacy location from SILE < v0.15.7
+        resource = string.format("i18n.%s", lang)
+        SU.debug("fluent", "Loading FTL resource from legacy location", resource, "into locale", lang)
+        gotftl, ftl = pcall(require, resource)
+      end
+      fluent:set_locale(original_language)
+      return gotftl and ftl and resource
     end)
     if not ftlresource then
       SU.warn(("Unable to load localized strings (e.g. table of contents header text) for %s")
         :format(language))
     else
-      SU.debug("silex", ("Load localized strings for %s: matched %s")
-        :format(language, matchedi18n))
-      if language ~= matchedi18n then
-        -- Now that's even more UGLY. Say the input language was "en-GB".
-        -- It matched "en" eventually (as we don't have yet an "i18n.en-GB" resource file)
-        -- PROBLEM: the fluent locale must be set to the target language before loading
-        -- a ftl file. APIs that aren't stateless are messy :(
-        -- in the case of our example, they had to be read into "en"...
-        -- All we can do is reload it fully, but under the target "en-GB" name...
-        local loaded = string.format("i18n.%s", matchedi18n)
-        package.loaded[loaded] = nil -- HACK force reload!!!
-        fluent:set_locale(language)
-        require(string.format("i18n.%s", matchedi18n))
-      end
+      SU.debug("silex", ("Load localized strings for %s from %s")
+        :format(language, resolved_resource))
     end
 
     -- Most language resource files act by side effects, directly tweaking
